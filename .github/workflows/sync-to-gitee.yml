@@ -1,0 +1,39 @@
+# ============================================================
+# GitHub -> Gitee 定时同步
+# 触发时机：
+#   1. push 到 master/main 分支时立即同步
+#   2. 每 6 小时定时同步一次（cron 为 UTC 时间，北京时间 = UTC+8）
+#   3. 可以在 GitHub Actions 页面手动触发（workflow_dispatch）
+# 使用前提：仓库里配置了两个 Secret（Settings -> Secrets and variables -> Actions）：
+#   GITEE_PRIVATE_KEY : Gitee SSH 私钥（完整内容，含 BEGIN/END 行）
+#   GITEE_TOKEN       : Gitee 私人令牌（需勾选 projects 权限，用于自动创建仓库）
+# ============================================================
+name: Sync to Gitee
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  schedule:
+    - cron: '0 */6 * * *'   # 每 6 小时同步一次，可自行调整
+  workflow_dispatch:        # 支持手动触发，方便测试
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror GitHub to Gitee
+        uses: eclipse-oniro4openharmony/hub-mirror-action@v1
+        with:
+          src: github/xujingyu                        # 源：GitHub 用户名
+          dst: gitee/xujingdong1899                   # 目标：Gitee 用户名
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}   # Gitee SSH 私钥
+          dst_token: ${{ secrets.GITEE_TOKEN }}       # Gitee 私人令牌（自动建仓用）
+          static_list: "${{ github.event.repository.name }}"  # 只同步当前这个仓库
+          force_update: true                          # 强制覆盖，保证与 GitHub 完全一致
+          debug: true                                 # 出错时输出详细日志（可随时删掉）
