@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
 
       - name: Mirror GitHub to Gitee
-        uses: eclipse-oniro4openharmony/hub-mirror-action@v1
+        uses: yikun/hub-mirror-action@v1.5
         with:
           src: github/xujingyu                        # 源：GitHub 用户名
           dst: gitee/xujingdong1899                   # 目标：Gitee 用户名
